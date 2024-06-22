@@ -11,7 +11,7 @@ spec:
    metadata:
      labels:
        app: spark-beam-jobserver
-       app.kubernetes.io/instance: custom_spark
+       app.kubernetes.io/instance: spark_custom
        app.kubernetes.io/name: spark
    spec:
      containers:
@@ -76,12 +76,12 @@ spec:
       labels:
         app: spark
         component: primary
-        app.kubernetes.io/instance: custom_spark
+        app.kubernetes.io/instance: spark_custom
         app.kubernetes.io/name: spark
     spec:
       containers:
       - name: primary
-        image: docker.io/secondcomet/spark-custom-2.4.6
+        image: docker.io/secondcomet/spark
         env:
         - name: SPARK_MODE
           value: "master"
@@ -93,6 +93,8 @@ spec:
           value: "no"
         - name: SPARK_SSL_ENABLED
           value: "no"
+        - name: SPARK_NO_DAEMONIZE
+          value: "1"
         ports:
         - containerPort: 7077
           name: masterendpoint
@@ -115,6 +117,9 @@ spec:
           requests:
             cpu: 0.5
             memory: 0.5Gi
+        command: [
+          "/bin/bash", "-c", "/opt/spark/sbin/start-master.sh"
+        ]
 ---
 apiVersion: v1
 kind: Service
@@ -166,7 +171,7 @@ spec:
       labels:
         app: spark
         component: children
-        app.kubernetes.io/instance: custom_spark
+        app.kubernetes.io/instance: spark_custom
         app.kubernetes.io/name: spark
     spec:
       containers:
@@ -188,7 +193,7 @@ spec:
             cpu: 0.5
             memory: 100Mi
       - name: children
-        image: docker.io/secondcomet/spark-custom-2.4.6
+        image: docker.io/secondcomet/spark
         env:
         - name: DOCKER_HOST
           value: "tcp://localhost:2375"
@@ -208,6 +213,8 @@ spec:
           value: "no"
         - name: SPARK_SSL_ENABLED
           value: "no"
+        - name: SPARK_NO_DAEMONIZE
+          value: "1"
         ports:
           - containerPort: 8081
             name: ui
@@ -221,6 +228,9 @@ spec:
           requests:
             cpu: 0.5
             memory: 1Gi
+        command: [
+          "/bin/bash", "-c", "/opt/spark/sbin/start-worker.sh", "spark://spark-primary:7077"
+        ]
       volumes:
       - name: dind-storage
         emptyDir:
@@ -252,7 +262,7 @@ metadata:
 spec:
   clusterIP: None
   selector:
-    app.kubernetes.io/instance: custom_spark
+    app.kubernetes.io/instance: spark_custom
     app.kubernetes.io/name: spark
   type: ClusterIP
 

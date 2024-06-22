@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "python-apache-beam-spark"
+version = "0.1.0"
+description = ""
+authors = ["Jens <jensnilsson94@hotmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+apache-beam = "2.33.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
